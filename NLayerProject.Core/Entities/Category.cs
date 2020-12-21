@@ -5,7 +5,7 @@ using System.Text;
 
 namespace NLayerProject.Core.Entities
 {
-    internal class Category
+    public class Category
     {
         public Category()
         {
