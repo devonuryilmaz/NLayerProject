@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using NLayerProject.Core.Entities;
 using NLayerProject.Core.Services;
 using NLayerProject.Dto;
+using NLayerProject.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,6 +48,7 @@ namespace NLayerProject.Controllers
             return Ok(_mapper.Map<ProductWithCategoryDto>(product));
         }
 
+        [ValidationFilter]
         [HttpPost]
         public async Task<IActionResult> Save(ProductDto product)
         {
