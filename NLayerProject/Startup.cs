@@ -1,24 +1,20 @@
- using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using NLayerProject.Core.Repositories;
 using NLayerProject.Core.Services;
 using NLayerProject.Core.UnitOfWorks;
 using NLayerProject.Data;
 using NLayerProject.Data.Repositories;
 using NLayerProject.Data.UnitOfWorks;
+using NLayerProject.Filters;
 using NLayerProject.Service.Services;
+using NLayerProject.Extensions;
 
 namespace NLayerProject
 {
@@ -35,22 +31,27 @@ namespace NLayerProject
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAutoMapper(typeof(Startup));
-            services.AddScoped(typeof(IRepository<>),typeof(Repository<>));
+            services.AddScoped<NotFoundFilter>();
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped(typeof(IService<>), typeof(Service<>));
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseSqlServer(Configuration["ConnectionStrings:SqlConStr"].ToString(), opt => {
+                options.UseSqlServer(Configuration["ConnectionStrings:SqlConStr"].ToString(), opt =>
+                {
                     opt.MigrationsAssembly("NLayerProject.Data");
                 });
             });
 
 
-            services.AddControllers();
+            services.AddControllers(
+                opt =>
+                {
+                    opt.Filters.Add(new ValidationFilter());
+                });
 
             services.Configure<ApiBehaviorOptions>(opt =>
             {
@@ -65,6 +66,8 @@ namespace NLayerProject
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseCustomException();
 
             app.UseHttpsRedirection();
 
